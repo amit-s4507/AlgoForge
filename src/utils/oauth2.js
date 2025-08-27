@@ -1,10 +1,21 @@
 // OAuth2 implementation for real authentication providers
 // This file contains the actual OAuth2 flow implementations
 
+// Get the correct redirect URI based on environment
+const getRedirectUri = () => {
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const host = window.location.host;
+    return `${protocol}//${host}/auth/callback`;
+  }
+  // Fallback for server-side rendering
+  return 'http://localhost:3000/auth/callback';
+};
+
 export const OAUTH_CONFIG = {
   google: {
     clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
-    redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/callback',
+    redirectUri: import.meta.env.VITE_GOOGLE_REDIRECT_URI || getRedirectUri(),
     scope: 'openid email profile',
     authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
     tokenUrl: 'https://oauth2.googleapis.com/token',
@@ -12,7 +23,7 @@ export const OAUTH_CONFIG = {
   },
   github: {
     clientId: import.meta.env.VITE_GITHUB_CLIENT_ID || '',
-    redirectUri: import.meta.env.VITE_GITHUB_REDIRECT_URI || 'http://localhost:3000/auth/callback',
+    redirectUri: import.meta.env.VITE_GITHUB_REDIRECT_URI || getRedirectUri(),
     scope: 'user:email',
     authUrl: 'https://github.com/login/oauth/authorize',
     tokenUrl: 'https://github.com/login/oauth/access_token',

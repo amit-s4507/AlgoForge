@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿import React, { useEffect, useMemo, useState } from "react";
+﻿﻿﻿﻿﻿﻿﻿﻿﻿import React, { useEffect, useMemo, useState } from "react";
 import { Plus, Search, Settings, LogOut, CalendarDays, Filter, Tags, Layers, PencilLine, FolderPlus, X, Upload, Download, User, BookOpen, Target } from "lucide-react";
 
 // Import components
@@ -15,6 +15,7 @@ import { LoginModal } from "./components/LoginModal";
 import { UserMenu } from "./components/UserMenu";
 import { TopicsView } from "./components/TopicsView";
 import { ProfilePage } from "./components/ProfilePage";
+import { OAuthCallback } from "./components/OAuthCallback";
 
 // Import hooks and utilities
 import { useAppReducer } from "./hooks/useAppReducer";
@@ -41,6 +42,11 @@ import { getAllTopicProblems } from "./data/topicsData";
  */
 
 export default function AlgoForge(){
+  // Check if we're on the OAuth callback route
+  if (window.location.pathname === '/auth/callback') {
+    return <OAuthCallback />;
+  }
+
   const [state, dispatch] = useAppReducer();
   const { user, isAuthenticated } = useAuth();
   const { sheets, progress, activity, ui } = state;
