@@ -1,4 +1,4 @@
-﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
+﻿﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
 
 <div align="center">
   <h3>A modern, comprehensive React application for mastering Data Structures & Algorithms</h3>
@@ -12,7 +12,7 @@
 ---
 
 ## 🌟 **Live Demo**
-🚀 **[AlgoForge Live Application](https://your-aws-deployment-link.com)** (Deploy link will be updated after AWS deployment)
+🚀 **[AlgoForge Live Application](https://dsa-sheet-qlaabee2n-amits-projects-552f728d.vercel.app)** - Experience the full DSA learning platform!
 
 ---
 
