@@ -1,12 +1,22 @@
 # AlgoForge Deployment Guide
 
-## Option 1: AWS S3 + CloudFront (Recommended)
+## Option 1: AWS S3 + CloudFront (Production Ready)
 After configuring AWS CLI, run:
 ```bash
 ./deploy-aws.bat
 ```
+This will:
+- Deploy to S3 for hosting
+- Set up CloudFront CDN for global distribution
+- Provide HTTPS and DDoS protection
+- Cache content at 400+ global edge locations
 
-## Option 2: Vercel (Easiest)
+For detailed CloudFront setup, see: `CLOUDFRONT-SETUP.md`
+
+## Option 2: CloudFront Only (If S3 already exists)
+```bash
+./setup-cloudfront.bat
+```
 ```bash
 npm install -g vercel
 vercel --prod

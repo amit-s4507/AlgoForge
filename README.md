@@ -1,4 +1,4 @@
-﻿﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
+﻿﻿﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
 
 <div align="center">
   <h3>A modern, comprehensive React application for mastering Data Structures & Algorithms</h3>
@@ -255,21 +255,18 @@ npm run lint
    # Configure AWS credentials
    aws configure
    
-   # Create S3 bucket
-   aws s3 mb s3://algoforge-app
+   # Deploy with CloudFront CDN (Recommended)
+   ./deploy-aws.bat
    
-   # Upload build files
-   aws s3 sync dist/ s3://algoforge-app --delete
-   
-   # Enable static website hosting
-   aws s3 website s3://algoforge-app --index-document index.html
+   # Or CloudFront only (if S3 exists)
+   ./setup-cloudfront.bat
    ```
 
-3. **Set up CloudFront** (for global CDN)
-   ```bash
-   # Create CloudFront distribution pointing to S3 bucket
-   # Configure custom domain (optional)
-   ```
+3. **CloudFront Benefits**
+   - **🌐 Global CDN**: 400+ edge locations worldwide
+   - **⚡ Performance**: 40-60% faster load times
+   - **🔒 Security**: DDoS protection + free SSL
+   - **📊 Analytics**: Detailed usage reports
 
 #### 🔧 **Alternative Deployment Options**
 - **Vercel** - `npm i -g vercel && vercel`
