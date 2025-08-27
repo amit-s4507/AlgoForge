@@ -1,4 +1,4 @@
-﻿export { Card } from "./Card";
+﻿﻿﻿﻿export { Card } from "./Card";
 export { ProgressRow } from "./ProgressRow";
 export { Last7 } from "./Last7";
 export { Accordion } from "./Accordion";
@@ -10,3 +10,6 @@ export { DynamicForm } from "./DynamicForm";
 export { TagInput } from "./TagInput";
 export { LoginModal } from "./LoginModal";
 export { UserMenu } from "./UserMenu";
+export { TopicsView } from "./TopicsView";
+export { ProfilePage } from "./ProfilePage";
+export { EmailPasswordAuth } from "./EmailPasswordAuth";

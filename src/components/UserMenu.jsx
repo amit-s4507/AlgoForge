@@ -3,11 +3,18 @@ import { LogOut, User, Settings, ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { classNames } from '../utils/helpers';
 
-export function UserMenu() {
+export function UserMenu({ onProfileClick }) {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
+
+  const handleProfileClick = () => {
+    setIsOpen(false);
+    if (onProfileClick) {
+      onProfileClick();
+    }
+  };
 
   return (
     <div className="relative">
@@ -36,7 +43,10 @@ export function UserMenu() {
               <div className="text-xs text-gray-400">{user.email}</div>
             </div>
             <div className="p-1">
-              <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5">
+              <button 
+                onClick={handleProfileClick}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-white/5"
+              >
                 <User className="h-4 w-4"/>
                 Profile
               </button>

@@ -1,5 +1,5 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
-import { Plus, Search, Settings, LogOut, CalendarDays, Filter, Tags, Layers, PencilLine, FolderPlus, X, Upload, Download, User } from "lucide-react";
+﻿﻿﻿﻿﻿﻿﻿import React, { useEffect, useMemo, useState } from "react";
+import { Plus, Search, Settings, LogOut, CalendarDays, Filter, Tags, Layers, PencilLine, FolderPlus, X, Upload, Download, User, BookOpen, Target } from "lucide-react";
 
 // Import components
 import { Card } from "./components/Card";
@@ -13,12 +13,15 @@ import { Modal } from "./components/Modal";
 import { DynamicForm } from "./components/DynamicForm";
 import { LoginModal } from "./components/LoginModal";
 import { UserMenu } from "./components/UserMenu";
+import { TopicsView } from "./components/TopicsView";
+import { ProfilePage } from "./components/ProfilePage";
 
 // Import hooks and utilities
 import { useAppReducer } from "./hooks/useAppReducer";
 import { useAuth } from "./contexts/AuthContext";
 import { todayKey, pct, classNames, getPastDates, computeStreak, toggleSet, slug } from "./utils/helpers";
 import { SCHEMA } from "./data/schema";
+import { getAllTopicProblems } from "./data/topicsData";
 
 /**
  * AlgoForge — DSA Sheet UI (Fresh blend, schemadriven, extensible)
@@ -43,12 +46,19 @@ export default function AlgoForge(){
   const { sheets, progress, activity, ui } = state;
   const activeSheet = useMemo(()=> sheets.find(s=>s.id===ui.selectedSheetId) || sheets[0], [sheets, ui.selectedSheetId]);
 
-
+  // Navigation state
+  const [currentView, setCurrentView] = useState('sheets'); // 'sheets', 'topics', 'profile'
+  const [showProfilePage, setShowProfilePage] = useState(false);
 
   useEffect(()=>{ dispatch({type:"persist"}); }, [sheets, progress, activity, ui]);
 
-  // ------- Derived metrics -------
-  const allItems = useMemo(()=> sheets.flatMap(s=>s.sections.flatMap(sec=>sec.items)), [sheets]);
+  // ------- Derived metrics (including topics data) -------
+  const allItems = useMemo(()=> {
+    const sheetItems = sheets.flatMap(s=>s.sections.flatMap(sec=>sec.items));
+    const topicItems = getAllTopicProblems();
+    return [...sheetItems, ...topicItems];
+  }, [sheets]);
+  
   const solvedCount = useMemo(()=> Object.values(progress).filter(p=>p.status==="solved").length, [progress]);
   const totalProblems = allItems.length;
 
@@ -102,6 +112,27 @@ export default function AlgoForge(){
   const [modal, setModal] = useState(null); // {type:'problem'|'section'|'sheet', data:{...}}
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Handle profile navigation
+  const handleProfileClick = () => {
+    setShowProfilePage(true);
+  };
+
+  // Handle topics problem toggle
+  const handleTopicProblemToggle = (problemId) => {
+    markSolved(problemId);
+  };
+
+  // If showing profile page, render it
+  if (showProfilePage) {
+    return (
+      <ProfilePage 
+        progress={progress} 
+        activity={activity} 
+        onClose={() => setShowProfilePage(false)} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0b10] text-gray-100">
       {/* Header */}
@@ -111,9 +142,34 @@ export default function AlgoForge(){
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500"/>
             <div className="text-lg font-semibold tracking-tight">AlgoForge</div>
             <div className="ml-6 hidden items-center gap-4 text-sm text-gray-400 md:flex">
-              <button className="hover:text-white">Practice</button>
-              <button className="hover:text-white">Playground</button>
-              <button className="hover:text-white">Roadmaps</button>
+              <button 
+                onClick={() => setCurrentView('sheets')}
+                className={classNames(
+                  "hover:text-white transition-colors",
+                  currentView === 'sheets' ? "text-white" : ""
+                )}
+              >
+                Practice
+              </button>
+              <button 
+                onClick={() => setCurrentView('topics')}
+                className={classNames(
+                  "hover:text-white transition-colors flex items-center gap-1",
+                  currentView === 'topics' ? "text-white" : ""
+                )}
+              >
+                <BookOpen className="h-4 w-4" />
+                Topics
+              </button>
+              {isAuthenticated && (
+                <button 
+                  onClick={handleProfileClick}
+                  className="hover:text-white transition-colors flex items-center gap-1"
+                >
+                  <Target className="h-4 w-4" />
+                  Profile
+                </button>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -127,7 +183,7 @@ export default function AlgoForge(){
             </label>
             <button className="rounded-xl border border-white/10 p-2 hover:border-white/20"><Settings className="h-4 w-4"/></button>
             {isAuthenticated ? (
-              <UserMenu />
+              <UserMenu onProfileClick={handleProfileClick} />
             ) : (
               <button 
                 onClick={() => setShowLoginModal(true)}
@@ -172,60 +228,68 @@ export default function AlgoForge(){
             <Heatmap days={getPastDates(364)} counts={activity} />
           </Card>
 
-          {/* Sheets */}
-          <Card noDivider>
-            {/* Tabs */}
-            <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 pb-3 pt-3">
-              {sheets.map((s)=>(
-                <button key={s.id} onClick={()=>dispatch({type:"ui:set", payload:{selectedSheetId:s.id}})} className={classNames("rounded-xl px-3 py-1.5 text-sm", ui.selectedSheetId===s.id?"bg-white/10 text-white":"text-gray-400 hover:text-white hover:bg-white/5")}>
-                  {s.name}
-                </button>
-              ))}
+          {/* Conditional View Rendering */}
+          {currentView === 'topics' ? (
+            <TopicsView 
+              progress={progress} 
+              onToggleProblem={handleTopicProblemToggle} 
+            />
+          ) : (
+            /* Sheets View */
+            <Card noDivider>
+              {/* Tabs */}
+              <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 pb-3 pt-3">
+                {sheets.map((s)=>(
+                  <button key={s.id} onClick={()=>dispatch({type:"ui:set", payload:{selectedSheetId:s.id}})} className={classNames("rounded-xl px-3 py-1.5 text-sm", ui.selectedSheetId===s.id?"bg-white/10 text-white":"text-gray-400 hover:text-white hover:bg-white/5")}>
+                    {s.name}
+                  </button>
+                ))}
+                {ui.admin && (
+                  <button onClick={()=>setModal({type:"sheet", data:{}})} className="ml-auto rounded-xl border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:border-white/20"><FolderPlus className="mr-2 inline h-4 w-4"/>New Sheet</button>
+                )}
+              </div>
+
+              {/* Controls */}
+              <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+                <div className="relative w-full md:max-w-lg">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"/>
+                  <input value={localQuery} onChange={e=>setLocalQuery(e.target.value)} placeholder="Search problems..." className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm outline-none placeholder:text-gray-500 focus:border-white/20"/>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <FilterChip label="Easy" active={ui.filters.diffs?.has("Easy")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Easy")} />
+                  <FilterChip label="Medium" active={ui.filters.diffs?.has("Medium")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Medium")} />
+                  <FilterChip label="Hard" active={ui.filters.diffs?.has("Hard")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Hard")} />
+                  <FilterChip label="Solved" active={ui.filters.status?.has("solved")} onToggle={()=>toggleSet(dispatch, ui, "status", "solved")} />
+                  <FilterChip label="Revise" active={ui.filters.status?.has("revise")} onToggle={()=>toggleSet(dispatch, ui, "status", "revise")} />
+                </div>
+              </div>
+
+              {/* Sections */}
+              <div className="divide-y divide-white/5">
+                {filteredSections.map((sec)=>(
+                  <Accordion key={sec.id} title={sec.title} right={ui.admin && (
+                    <button onClick={()=>setModal({type:"problem", data:{ sheetId:activeSheet.id, sectionId:sec.id }})} className="rounded-xl border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:border-white/20"><Plus className="mr-1 inline h-4 w-4"/>Add Problem</button>
+                  )}>
+                    {sec.items.length===0 ? (
+                      <div className="p-4 text-sm text-gray-400">No items match filters.</div>
+                    ) : (
+                      <div className="divide-y divide-white/5">
+                        {sec.items.map((it)=>(
+                          <ProblemRow key={it.id} item={it} state={state.progress[it.id]?.status||"todo"} onToggleSolved={()=>markSolved(it.id)} onToggleRevision={()=>toggleRevision(it.id)} />
+                        ))}
+                      </div>
+                    )}
+                  </Accordion>
+                ))}
+              </div>
+
               {ui.admin && (
-                <button onClick={()=>setModal({type:"sheet", data:{}})} className="ml-auto rounded-xl border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:border-white/20"><FolderPlus className="mr-2 inline h-4 w-4"/>New Sheet</button>
+                <div className="border-t border-white/5 p-4">
+                  <button onClick={()=>setModal({type:"section", data:{ sheetId:activeSheet.id }})} className="rounded-xl border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:border-white/20"><Layers className="mr-2 inline h-4 w-4"/>Add Section</button>
+                </div>
               )}
-            </div>
-
-            {/* Controls */}
-            <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-              <div className="relative w-full md:max-w-lg">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"/>
-                <input value={localQuery} onChange={e=>setLocalQuery(e.target.value)} placeholder="Search problems..." className="w-full rounded-xl border border-white/10 bg-white/5 py-2 pl-9 pr-3 text-sm outline-none placeholder:text-gray-500 focus:border-white/20"/>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm">
-                <FilterChip label="Easy" active={ui.filters.diffs?.has("Easy")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Easy")} />
-                <FilterChip label="Medium" active={ui.filters.diffs?.has("Medium")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Medium")} />
-                <FilterChip label="Hard" active={ui.filters.diffs?.has("Hard")} onToggle={()=>toggleSet(dispatch, ui, "diffs", "Hard")} />
-                <FilterChip label="Solved" active={ui.filters.status?.has("solved")} onToggle={()=>toggleSet(dispatch, ui, "status", "solved")} />
-                <FilterChip label="Revise" active={ui.filters.status?.has("revise")} onToggle={()=>toggleSet(dispatch, ui, "status", "revise")} />
-              </div>
-            </div>
-
-            {/* Sections */}
-            <div className="divide-y divide-white/5">
-              {filteredSections.map((sec)=>(
-                <Accordion key={sec.id} title={sec.title} right={ui.admin && (
-                  <button onClick={()=>setModal({type:"problem", data:{ sheetId:activeSheet.id, sectionId:sec.id }})} className="rounded-xl border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:border-white/20"><Plus className="mr-1 inline h-4 w-4"/>Add Problem</button>
-                )}>
-                  {sec.items.length===0 ? (
-                    <div className="p-4 text-sm text-gray-400">No items match filters.</div>
-                  ) : (
-                    <div className="divide-y divide-white/5">
-                      {sec.items.map((it)=>(
-                        <ProblemRow key={it.id} item={it} state={state.progress[it.id]?.status||"todo"} onToggleSolved={()=>markSolved(it.id)} onToggleRevision={()=>toggleRevision(it.id)} />
-                      ))}
-                    </div>
-                  )}
-                </Accordion>
-              ))}
-            </div>
-
-            {ui.admin && (
-              <div className="border-t border-white/5 p-4">
-                <button onClick={()=>setModal({type:"section", data:{ sheetId:activeSheet.id }})} className="rounded-xl border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:border-white/20"><Layers className="mr-2 inline h-4 w-4"/>Add Section</button>
-              </div>
-            )}
-          </Card>
+            </Card>
+          )}
         </section>
       </main>
 
