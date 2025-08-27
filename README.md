@@ -1,4 +1,4 @@
-﻿﻿﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
+﻿﻿﻿﻿# 🔥 AlgoForge - Advanced DSA Practice Platform
 
 <div align="center">
   <h3>A modern, comprehensive React application for mastering Data Structures & Algorithms</h3>
@@ -12,7 +12,7 @@
 ---
 
 ## 🌟 **Live Demo**
-🚀 **[AlgoForge Live Application](https://dsa-sheet-qlaabee2n-amits-projects-552f728d.vercel.app)** - Experience the full DSA learning platform!
+🚀 **[AlgoForge Live Application](https://dsa-sheet-jnyfeinhc-amits-projects-552f728d.vercel.app)** - Experience the full DSA learning platform!
 
 ---
 
@@ -354,7 +354,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **GitHub Issues** - [Report bugs or request features](https://github.com/amit-s4507/AlgoForge/issues)
 - **Discussions** - [Join community discussions](https://github.com/amit-s4507/AlgoForge/discussions)
-- **Email** - [amit.s4507@example.com](mailto:amit.s4507@example.com)
+- **Email** - [sssahu1910@gmail.com](mailto:sssahu1910@gmail.com)
 
 ---
 
